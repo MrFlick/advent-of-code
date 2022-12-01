@@ -1,7 +1,7 @@
 
 elves = []
 
-with open("2022-Day01.txt") as f:
+with open("2022-Day01.txt", encoding="utf-8") as f:
     current_elf = 0
     for line in f:
         line = line.strip()
