@@ -1,9 +1,6 @@
 from heapq import heappush, heappop
 
 def get_grid():
-    def translate(x:str):
-        if x.islower():
-            return(ord(x)-96)
     with open("2022-Day12.txt", encoding="utf-8") as f:
         rows = [list(x.strip()) for x in f.readlines()]
 
@@ -25,45 +22,60 @@ def nei(pos, NR, NC):
         nextp = (pos[0] + dx, pos[1] + dy)
         if 0 <= nextp[0] < NR and 0 <= nextp[1] < NC:
             yield nextp
-        
 
-def solve1():
-    q = []
-    grid, start, end = get_grid()
-    NR = len(grid)
-    NC = len(grid[0])
-    heappush(q, (0, start))
-    visited = set()
-    visited.add(start)
-    while q:
-        dist, pos = heappop(q)
-        if pos == end:
-            return dist
-        for nextp in nei(pos, NR, NC):
-            if nextp not in visited:
-                if grid[nextp[0]][nextp[1]] <= grid[pos[0]][pos[1]] + 1:
-                    visited.add(nextp)
-                    heappush(q, (dist + 1, nextp))
+class PathFinderBase():
 
-print("Part 1:", solve1())
+    def __init__(self):
+        self.grid, self.sloc, self.eloc = get_grid()
+        self.q = []
+        self.visited = set()
+
+    def init_search(self):
+        raise NotImplementedError()
+
+    def is_valid_move(self, pos, nextp):
+        raise NotImplementedError()
+
+    def is_solved(self, pos):
+        raise NotImplementedError()
+
+    def solve(self):
+        NR = len(self.grid)
+        NC = len(self.grid[0])
+        self.init_search()
+        while self.q:
+            dist, pos = heappop(self.q)
+            if self.is_solved(pos):
+                return dist
+            for nextp in nei(pos, NR, NC):
+                if nextp not in self.visited:
+                    if self.is_valid_move(pos, nextp):
+                        self.visited.add(nextp)
+                        heappush(self.q, (dist + 1, nextp))
+
+class PathFinderPart1(PathFinderBase):
+    def init_search(self):
+        heappush(self.q, (0, self.sloc))
+        self.visited.add(self.sloc)
+
+    def is_valid_move(self, pos, nextp):
+        return self.grid[nextp[0]][nextp[1]] <= self.grid[pos[0]][pos[1]] + 1
+
+    def is_solved(self, pos):
+        return pos == self.eloc
+
+class PathFinderPart2(PathFinderBase):
+    def init_search(self):
+        heappush(self.q, (0, self.eloc))
+        self.visited.add(self.eloc)
+
+    def is_valid_move(self, pos, nextp):
+        return self.grid[nextp[0]][nextp[1]] >= self.grid[pos[0]][pos[1]] - 1
+
+    def is_solved(self, pos):
+        return self.grid[pos[0]][pos[1]] == 1
+
+print("Part 1:", PathFinderPart1().solve())
 # 437
-
-def solve2():
-    q = []
-    grid, _, start = get_grid()
-    NR = len(grid)
-    NC = len(grid[0])
-    heappush(q, (0, start))
-    visited = set()
-    visited.add(start)
-    while q:
-        dist, pos = heappop(q)
-        if grid[pos[0]][pos[1]] == 1:
-            return dist
-        for nextp in nei(pos, NR, NC):
-            if nextp not in visited:
-                if grid[nextp[0]][nextp[1]] >= grid[pos[0]][pos[1]] - 1:
-                    visited.add(nextp)
-                    heappush(q, (dist + 1, nextp))
-
-print("Part 2:", solve2())
+print("Part 2:", PathFinderPart2().solve())
+# 430
