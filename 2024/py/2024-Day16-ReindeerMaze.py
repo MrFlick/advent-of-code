@@ -93,9 +93,9 @@ def part1(filename):
             path[deer.pos] = before
             #draw_grid(grid, path, start, end)
             return cost
-        if deer.pos in cache and cache[deer.pos] <= cost:
+        if (deer.pos, deer.facing) in cache and cache[(deer.pos, deer.facing)] <= cost:
             continue
-        cache[deer.pos] = cost
+        cache[(deer.pos, deer.facing)] = cost
         path[deer.pos] = before
         for prop in deer.moves():
             if prop.deer.pos in grid.walls:
@@ -109,4 +109,4 @@ assert(part1("2024-Day16-test1.txt")==7036)
 assert(part1("2024-Day16-test2.txt")==11048)
 
 print("Part 1:", part1("2024-Day16.txt"))
-# too high 82464
+# 82460
